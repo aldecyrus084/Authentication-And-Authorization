@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "OM7voFUXPFc=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\aldec\\source\\repos\\Authentication&Authorization\\MyApp.Domain\\MyApp.Domain.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\aldec\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\10.0.14\\microsoft.extensions.dependencyinjection.abstractions.10.0.14.nupkg.sha512",
+    "C:\\Users\\aldec\\.nuget\\packages\\system.security.cryptography.pkcs\\10.0.14\\system.security.cryptography.pkcs.10.0.14.nupkg.sha512"
+  ],
+  "logs": []
+}

@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "WQWn34bDShc=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\aldec\\source\\repos\\Authentication&Authorization\\MyApp.API\\MyApp.API.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\aldec\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.12\\microsoft.aspnetcore.openapi.10.0.12.nupkg.sha512",
+    "C:\\Users\\aldec\\.nuget\\packages\\microsoft.openapi\\2.12.0\\microsoft.openapi.2.12.0.nupkg.sha512",
+    "C:\\Users\\aldec\\.nuget\\packages\\system.security.cryptography.pkcs\\10.0.14\\system.security.cryptography.pkcs.10.0.14.nupkg.sha512"
+  ],
+  "logs": []
+}
