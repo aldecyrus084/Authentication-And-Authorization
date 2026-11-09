@@ -61,6 +61,14 @@
               "target": "Package",
               "version": "[4.2.0, )"
             },
+            "FluentValidation": {
+              "target": "Package",
+              "version": "[12.2.0, )"
+            },
+            "FluentValidation.DependencyInjectionExtensions": {
+              "target": "Package",
+              "version": "[12.2.0, )"
+            },
             "MediatR": {
               "target": "Package",
               "version": "[14.3.0, )"

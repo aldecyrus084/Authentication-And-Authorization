@@ -10,6 +10,14 @@ namespace MyApp.Infrastructure.Persistence
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-        public DbSet<Users> User { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Users>()
+                .HasKey(u => u.userId);
+        }
+        public DbSet<Users> Users { get; set; }
     }
 }

@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using MyApp.Application.Services;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using MyApp.Application;
+using MyApp.Infrastructure;
+using MyApp.Application.Behavior;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +13,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+builder.Services.AddApplicationDI();
+builder.Services.AddInfrastructureDI(builder.Configuration);
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 
@@ -36,12 +42,18 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddSingleton(jwtSettings!);
 
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

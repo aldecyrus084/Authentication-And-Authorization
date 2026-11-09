@@ -15,17 +15,22 @@ namespace MyApp.Infrastructure.Repository
 
         public async Task AddUserAsync(Users user)
         {
-            await _context.User.AddAsync(user);
+            await _context.Users.AddAsync(user);
         }
 
         public async Task<IEnumerable<Users>> GetAllUsersAsync()
         {
-            return await _context.User.ToListAsync();
+            return await _context.Users.ToListAsync();
         }
 
         public async Task<Users?> GetUserByEmailAsync(string email)
         {
-            return await _context.User.FirstOrDefaultAsync(x => x.Email == email);
+            return await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
         }
     }
 }

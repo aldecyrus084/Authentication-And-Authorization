@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MyApp.Application.Interfaces.Repository;
 using MyApp.Application.Interfaces.Services;
 using MyApp.Application.Services;
+using MyApp.Domain.Entities;
 using MyApp.Infrastructure.Persistence;
 using MyApp.Infrastructure.Repository;
 using System;
@@ -23,6 +24,7 @@ namespace MyApp.Infrastructure
 
             services.AddScoped<ITokenGenerator, TokenGenerator>();
             services.AddScoped<IUserRepository, UserRepository>();
+
             return services;
         }
     }

@@ -1,10 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using MyApp.Application.Interfaces.Repository;
-using MyApp.Application.Interfaces.Services;
-using MyApp.Application.Services;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using FluentValidation;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using MyApp.Application.Behavior;
+using MyApp.Application.Features.Registration;
 
 namespace MyApp.Application
 {
@@ -12,6 +10,18 @@ namespace MyApp.Application
     {
         public static IServiceCollection AddApplicationDI(this IServiceCollection services)
         {
+            var assembly = typeof(UserRegistrationCommand).Assembly;
+
+            // Register MediatR and Validation Pipeline
+            services.AddMediatR(cfg =>
+            {
+                cfg.RegisterServicesFromAssembly(assembly);
+                cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+            });
+
+            // Register all FluentValidation validators
+            services.AddValidatorsFromAssembly(assembly);
+
             return services;
         }
     }
