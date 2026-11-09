@@ -1,4 +1,5 @@
 ﻿using Microsoft.IdentityModel.Tokens;
+using MyApp.Application.DTOs;
 using MyApp.Application.Interfaces.Services;
 using MyApp.Domain.Entities;
 using System;
@@ -18,43 +19,38 @@ namespace MyApp.Application.Services
             _jwtSettings = jwtSettings;
         }
 
-        public string GenerateToken(Users user)
+        public AuthResponseDTO GenerateToken(Users user)
         {
-            // 1. Create the secret key
-            var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_jwtSettings.Secret)
-            );
+            var issuer = _jwtSettings.Issuer;
+            var audience = _jwtSettings.Audience;
+            var key = Encoding.UTF8.GetBytes(_jwtSettings.Secret);
+            var tokenValidity = _jwtSettings.ExpirationMinute;
+            var tokenExpiryTimeStamp = DateTime.UtcNow.AddMinutes(tokenValidity);
 
-            // 2. Create signing credentials
-            var credentials = new SigningCredentials(
-                key,
-                SecurityAlgorithms.HmacSha256
-            );
-
-            // 3. Prepare user claims
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.userId.ToString()),
-
-                new Claim(ClaimTypes.Name, user.Name),
-
                 new Claim(ClaimTypes.Email, user.Email),
-
+                new Claim(ClaimTypes.Name, user.Name)
             };
 
-            // 4. Create JWT token
             var token = new JwtSecurityToken(
-                issuer: _jwtSettings.Issuer,
-                audience: _jwtSettings.Audience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(
-                    _jwtSettings.ExpirationMinute
-                ),
-                signingCredentials: credentials
+                issuer,
+                audience,
+                claims,
+                expires: tokenExpiryTimeStamp,
+                signingCredentials: new SigningCredentials(new SymmetricSecurityKey(key),
+                SecurityAlgorithms.HmacSha512Signature)
             );
 
-            // 5. Convert token into a string
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return new AuthResponseDTO
+            {
+                UserId = user.userId,
+                Name = user.Name,
+                Email = user.Email,
+                Token = token.ToString(),
+                TokenValidityMin = (int)tokenExpiryTimeStamp.Subtract(DateTime.UtcNow).TotalSeconds
+            };
         }
     }
 }

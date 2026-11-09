@@ -10,5 +10,7 @@ namespace MyApp.Application.DTOs
         public string Name { get; set; }
         public string Email { get; set; }
         public string Token { get; set; }
+        public int TokenValidityMin { get; set; }
+        public string? RefreshToken { get; set; }
     }
 }

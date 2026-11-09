@@ -1,0 +1,6 @@
+C:\Users\admin\source\repos\Authentication-And-Authorization\MyApp.Application\obj\Debug\net10.0\MyApp.Application.csproj.AssemblyReference.cache
+C:\Users\admin\source\repos\Authentication-And-Authorization\MyApp.Application\obj\Debug\net10.0\MyApp.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\admin\source\repos\Authentication-And-Authorization\MyApp.Application\obj\Debug\net10.0\MyApp.Application.AssemblyInfoInputs.cache
+C:\Users\admin\source\repos\Authentication-And-Authorization\MyApp.Application\obj\Debug\net10.0\MyApp.Application.AssemblyInfo.cs
+C:\Users\admin\source\repos\Authentication-And-Authorization\MyApp.Application\obj\Debug\net10.0\MyApp.Application.csproj.CoreCompileInputs.cache
+C:\Users\admin\source\repos\Authentication-And-Authorization\MyApp.Application\obj\Debug\net10.0\MyApp.Application.sourcelink.json
