@@ -1,10 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using MyApp.Application.Interfaces.Repository;
-using MyApp.Application.Interfaces.Services;
+﻿using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using MyApp.Application.Features.Registration;
 using MyApp.Application.Services;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace MyApp.Application
 {
@@ -12,6 +9,14 @@ namespace MyApp.Application
     {
         public static IServiceCollection AddApplicationDI(this IServiceCollection services)
         {
+
+            // Register MediatR and Validation Pipeline
+            services.AddMediatR(cfg =>
+            {
+                cfg.RegisterServicesFromAssembly(typeof(JwtSettings).Assembly);
+            });
+
+
             return services;
         }
     }

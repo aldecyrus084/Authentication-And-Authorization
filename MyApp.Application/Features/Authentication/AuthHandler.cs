@@ -48,13 +48,7 @@ namespace MyApp.Application.Features.Authentication
                 {
                     isSuccess = true,
                     message = "Login Successfully",
-                    Data = new AuthResponseDTO
-                    {
-                        UserId = user.userId,
-                        Name = user.Name,
-                        Email = user.Email,
-                        Token = token
-                    }
+                    Data = token
                 };
             }
             catch(Exception ex)
