@@ -28,7 +28,7 @@ namespace MyApp.Application.Features.Authentication
                     return new GenericResponseDTO<AuthResponseDTO>
                     {
                         isSuccess = false,
-                        message = "Email or Password invalid."
+                        message = "Email invalid."
                     };
                 }
 
@@ -38,7 +38,7 @@ namespace MyApp.Application.Features.Authentication
                     return new GenericResponseDTO<AuthResponseDTO>
                     {
                         isSuccess = false,
-                        message = "Email or Password invalid."
+                        message = "Password invalid."
                     };
                 }
 

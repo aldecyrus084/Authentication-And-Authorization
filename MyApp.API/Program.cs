@@ -41,6 +41,8 @@ builder.Services.AddAuthentication(options =>
 
 });
 
+builder.Services.AddAuthorization();
+
 builder.Services.AddSingleton(jwtSettings!);
 
 

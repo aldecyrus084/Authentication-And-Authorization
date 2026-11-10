@@ -24,7 +24,6 @@ namespace MyApp.Application.Features.Registration
 
                 var hashPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
-
                 var user = new Users(request.Name, request.Email, hashPassword);
 
                 await _userRepo.AddUserAsync(user);

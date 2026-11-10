@@ -44,7 +44,6 @@ C:\Users\admin\source\repos\Authentication-And-Authorization\MyApp.API\obj\Debug
 C:\Users\admin\source\repos\Authentication-And-Authorization\MyApp.API\obj\Debug\net10.0\staticwebassets.development.json
 C:\Users\admin\source\repos\Authentication-And-Authorization\MyApp.API\obj\Debug\net10.0\staticwebassets.build.endpoints.json
 C:\Users\admin\source\repos\Authentication-And-Authorization\MyApp.API\obj\Debug\net10.0\swae.build.ex.cache
-C:\Users\admin\source\repos\Authentication-And-Authorization\MyApp.API\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
 C:\Users\admin\source\repos\Authentication-And-Authorization\MyApp.API\obj\Debug\net10.0\MyApp.API.csproj.Up2Date
 C:\Users\admin\source\repos\Authentication-And-Authorization\MyApp.API\obj\Debug\net10.0\MyApp.API.dll
 C:\Users\admin\source\repos\Authentication-And-Authorization\MyApp.API\obj\Debug\net10.0\refint\MyApp.API.dll
@@ -182,7 +181,6 @@ C:\Users\admin\source\repos\Authentication-And-Authorization\MyApp.API\bin\Debug
 C:\Users\admin\source\repos\Authentication-And-Authorization\MyApp.API\bin\Debug\net10.0\Swashbuckle.AspNetCore.Swagger.dll
 C:\Users\admin\source\repos\Authentication-And-Authorization\MyApp.API\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 C:\Users\admin\source\repos\Authentication-And-Authorization\MyApp.API\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerUI.dll
-C:\Users\admin\source\repos\Authentication-And-Authorization\MyApp.API\bin\Debug\net10.0\FluentValidation.DependencyInjectionExtensions.dll
 C:\Users\aldec\source\repos\Authentication&Authorization\MyApp.API\obj\Debug\net10.0\MyApp.API.csproj.AssemblyReference.cache
 C:\Users\aldec\source\repos\Authentication&Authorization\MyApp.API\obj\Debug\net10.0\rpswa.dswa.cache.json
 C:\Users\aldec\source\repos\Authentication&Authorization\MyApp.API\obj\Debug\net10.0\MyApp.API.GeneratedMSBuildEditorConfig.editorconfig
@@ -366,3 +364,4 @@ C:\Users\aldec\source\repos\Authentication&Authorization\MyApp.API\obj\Debug\net
 C:\Users\aldec\source\repos\Authentication&Authorization\MyApp.API\obj\Debug\net10.0\MyApp.API.csproj.Up2Date
 C:\Users\aldec\source\repos\Authentication&Authorization\MyApp.API\obj\Debug\net10.0\MyApp.API.genruntimeconfig.cache
 C:\Users\aldec\source\repos\Authentication&Authorization\MyApp.API\obj\Debug\net10.0\ref\MyApp.API.dll
+C:\Users\admin\source\repos\Authentication-And-Authorization\MyApp.API\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt

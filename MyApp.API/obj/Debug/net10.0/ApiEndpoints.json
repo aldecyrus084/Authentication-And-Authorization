@@ -30,5 +30,15 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "UserController",
+    "Method": "GetAllUsers",
+    "RelativePath": "api/users",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
   }
 ]

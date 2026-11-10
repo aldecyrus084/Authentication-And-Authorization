@@ -1,348 +1,198 @@
-# Authentication & Authorization System
+# Authentication and Authorization API
 
-A comprehensive .NET 10 Web API project demonstrating secure user authentication and authorization using JWT (JSON Web Tokens). This project follows clean architecture principles with a layered approach featuring the Application, Domain, API, and Infrastructure layers.
+A .NET 10 Web API exploring user registration, password-based sign-in, JWTs, and permission-based authorization with a role/permission data model. The solution uses a layered architecture with API, Application, Domain, and Infrastructure projects.
 
-## 📋 Project Overview
+> **Implementation status:** Authentication and RBAC are not yet fully connected end to end. The project contains JWT configuration and generation, registration/login handlers, permission policies, and role/permission entities. However, the current API pipeline does not call `UseAuthentication()`, generated JWTs do not contain permission claims, and no role/permission assignment or lookup flow is implemented. The current EF Core migration creates only the `Users` table. See [Known gaps](#known-gaps) before relying on protected endpoints.
 
-This project implements a production-ready authentication system with the following architecture:
+## What is implemented
 
-- **MyApp.API** - REST API layer with ASP.NET Core controllers
-- **MyApp.Application** - Business logic, services, and MediatR handlers
-- **MyApp.Infrastructure** - Data access, repositories, and persistence
-- **MyApp.Domain** - Core entities and domain models
+- **Registration:** `POST /api/auth/register` validates a name, email, password, and confirmation, hashes the password with BCrypt, and stores the user.
+- **Login:** `POST /api/auth` looks up a user by email, verifies the BCrypt hash, and creates a signed JWT response.
+- **JWT validation configuration:** The API configures bearer-token validation for issuer, audience, lifetime, and signing key.
+- **Permission authorization building blocks:** A dynamic authorization policy provider and handler check for a `permission` claim. `GET /api/users` requests the `user:update` policy.
+- **RBAC domain model:** Entities represent users, roles, permissions, user-role assignments, and role-permission assignments.
+- **Data access:** Entity Framework Core with SQL Server and a user repository.
+- **Application patterns:** MediatR request handlers and a FluentValidation pipeline for registration.
 
-## 🔐 Authentication Implementation
+## Architecture
 
-### Key Authentication Features
+| Project | Responsibility |
+| --- | --- |
+| `MyApp.API` | ASP.NET Core endpoints, JWT bearer configuration, authorization, OpenAPI, and Swagger |
+| `MyApp.Application` | MediatR handlers, DTOs, validation, permission policy provider and handler, and service contracts |
+| `MyApp.Domain` | User, role, permission, and association entities |
+| `MyApp.Infrastructure` | EF Core `ApplicationDbContext`, SQL Server registration, migrations, and repository implementations |
 
-The authentication system is built on the following components:
+## API endpoints
 
-#### 1. **JWT Token Generation**
-- **TokenGenerator** - Generates secure JWT tokens for authenticated users
-- **JwtSettings** - Configuration class for JWT parameters
-  - **Secret**: Secret key for signing tokens
-  - **Issuer**: Token issuer identifier
-  - **Audience**: Token audience identifier
-  - **ExpirationMinute**: Token validity period in minutes
+### Register a user
 
-#### 2. **Password Security**
-- Uses **BCrypt.Net** for secure password hashing and verification
-- Passwords are never stored in plain text
-- Password verification is performed using BCrypt comparison
-
-#### 3. **User Authentication Flow**
-The authentication process follows these steps:
-1. User sends email and password to the login endpoint
-2. `AuthHandler` (MediatR handler) processes the authentication request
-3. User is retrieved from database by email
-4. Password is verified using BCrypt
-5. JWT token is generated with user claims
-6. Token and user information are returned to the client
-
-#### 4. **Token Claims**
-JWT tokens include the following user claims:
-- **NameIdentifier**: User ID (UserId)
-- **Name**: User's full name
-- **Email**: User's email address
-
-### Authentication API Endpoint
-
-**POST** `api/auth`
-
-Request Body:
-```json
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
-```
-
-Response (Success):
-```json
-{
-  "isSuccess": true,
-  "message": "Login Successfully",
-  "data": {
-	"userId": "550e8400-e29b-41d4-a716-446655440000",
-	"name": "John Doe",
-	"email": "user@example.com",
-	"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-  }
-}
-```
-
-Response (Failure):
-```json
-{
-  "isSuccess": false,
-  "message": "Email or Password invalid."
-}
-```
-
-## 🏗️ Architecture Components
-
-### Core Authentication Classes
-
-#### **AuthCommand** (Location: `MyApp.Application/Features/Authentication/`)
-- MediatR IRequest implementation
-- Contains Email and Password properties
-- Triggers the authentication handler
-
-#### **AuthHandler** (Location: `MyApp.Application/Features/Authentication/`)
-- Implements `IRequestHandler<AuthCommand, GenericResponseDTO<AuthResponseDTO>>`
-- Main business logic for user authentication
-- Password verification and token generation coordination
-
-#### **TokenGenerator** (Location: `MyApp.Application/Services/`)
-- Implements `ITokenGenerator` interface
-- Creates signed JWT tokens
-- Uses HS256 (HMAC SHA-256) signing algorithm
-
-#### **JwtSettings** (Location: `MyApp.Application/Services/`)
-- Configuration class for JWT parameters
-- Injected as singleton in dependency injection
-
-#### **ITokenGenerator** (Location: `MyApp.Application/Interfaces/Services/`)
-- Service interface for token generation
-- Defines `GenerateToken(Users user)` contract
-
-#### **IUserRepository** (Location: `MyApp.Application/Interfaces/Repository/`)
-- Repository interface for user data access
-- Provides `GetUserByEmailAsync(string email)` method
-
-## 🛠️ Setup & Installation
-
-### Prerequisites
-- .NET 10 SDK or later
-- Visual Studio 2026 (or compatible IDE)
-- SQL Server or other supported database
-
-### Dependencies
-
-Key NuGet packages used:
-- **MediatR** - CQRS and command handling
-- **BCrypt.Net-Next** - Password hashing and verification
-- **System.IdentityModel.Tokens.Jwt** - JWT token creation and validation
-- **Microsoft.IdentityModel.Tokens** - Token security and signing
-- **Entity Framework Core** - Database access (in Infrastructure layer)
-
-### Configuration
-
-#### 1. JWT Settings Configuration
-Update `appsettings.json` with your JWT configuration:
+`POST /api/auth/register`
 
 ```json
 {
-  "JwtSettings": {
-	"Secret": "your-very-secure-secret-key-min-32-chars",
-	"Issuer": "your-app-name",
-	"Audience": "your-app-users",
-	"ExpirationMinute": 60
-  }
+  "name": "Jane Doe",
+  "email": "jane@example.com",
+  "password": "StrongPass123",
+  "confirmPassword": "StrongPass123"
 }
 ```
 
-**Important**: 
-- Secret key should be at least 32 characters long
-- Use strong, random values for production
-- Store sensitive values in environment variables or Azure Key Vault
+Registration validation currently requires a non-empty name (up to 100 characters), a valid email (up to 256 characters), and a password of 8–100 characters containing uppercase, lowercase, and numeric characters. The confirmation must match the password. A successful response contains the new user's ID, name, and email; it does not sign the user in.
 
-#### 2. Database Connection
-Configure your database connection in `appsettings.json`:
+### Sign in
+
+`POST /api/auth`
 
 ```json
 {
-  "ConnectionString": {
-	"DefaultConnection": "Server=your-server;Database=YourDB;User Id=sa;Password=yourpassword;"
-  }
+  "email": "jane@example.com",
+  "password": "StrongPass123"
 }
 ```
 
-#### 3. Dependency Injection Setup
-The `Program.cs` file automatically registers:
-- JWT Settings service
-- MediatR handlers
-- Repository implementations
-- Token generator service
+A successful response contains `isSuccess`, `message`, and `data` with the user ID, name, email, token, and token validity duration. Login failures currently return a failure response from the handler; the controller responds with HTTP 200 for both successful and unsuccessful login attempts.
 
-### Running the Application
+The response field is named `tokenValidityMin`, but the current implementation calculates it in seconds.
 
-1. Clone the repository:
-```bash
-git clone https://github.com/aldecyrus084/Authentication-And-Authorization.git
-cd Authentication-And-Authorization
+### List users
+
+`GET /api/users`
+
+This endpoint is annotated with the `user:update` authorization policy. It returns user IDs, names, and email addresses. Permission-based access is not currently operational; see [Known gaps](#known-gaps).
+
+## Configuration
+
+The API reads the SQL Server connection string from `ConnectionStrings:DefaultConnection` and JWT settings from `JwtSettings`.
+
+For local development, set these values using user secrets or environment variables rather than committing secrets:
+
+```powershell
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "<your SQL Server connection string>" --project MyApp.API
+dotnet user-secrets set "JwtSettings:Secret" "<a long random signing key>" --project MyApp.API
+dotnet user-secrets set "JwtSettings:Issuer" "<your issuer>" --project MyApp.API
+dotnet user-secrets set "JwtSettings:Audience" "<your audience>" --project MyApp.API
 ```
 
-2. Restore NuGet packages:
-```bash
+The equivalent environment variable names are `ConnectionStrings__DefaultConnection`, `JwtSettings__Secret`, `JwtSettings__Issuer`, and `JwtSettings__Audience`. `JwtSettings:ExpirationMinute` controls token lifetime; the checked-in configuration sets it to 60 minutes.
+
+The current checked-in application settings contain a placeholder-like JWT secret and empty issuer/audience values. Configure valid values before testing JWT validation, and use a strong, unique secret outside development.
+
+## Run locally
+
+Prerequisites: .NET 10 SDK and a SQL Server instance accessible to the configured connection string.
+
+From the repository root:
+
+```powershell
 dotnet restore
-```
-
-3. Update database (if using EF Core migrations):
-```bash
-dotnet ef database update
-```
-
-4. Run the application:
-```bash
+dotnet ef database update --project MyApp.Infrastructure --startup-project MyApp.API
 dotnet run --project MyApp.API
 ```
 
-5. Access the API:
-- Swagger UI: `https://localhost:5001/openapi`
-- Authentication endpoint: `POST https://localhost:5001/api/auth`
+The launch profiles use `https://localhost:7031` and `http://localhost:5148`. In Development, Swagger UI is available at `/swagger`, and the OpenAPI document is available at `/openapi/v1.json`.
 
-## 🔑 Important Implementation Details
+The checked-in initial migration creates only the `Users` table. It does not create the RBAC tables represented by the current `ApplicationDbContext`; a migration that includes the current model is needed before those entities can be persisted.
 
-### 1. **Password Hashing**
-Passwords are hashed using BCrypt before storing in the database:
-```csharp
-var hashedPassword = BCrypt.Net.BCrypt.HashPassword(plainPassword);
+## Authentication and authorization flow (intended)
+
+The existing login handler follows this sequence:
+
+1. Find the user by email.
+2. Verify the submitted password against the stored BCrypt hash.
+3. Generate a signed JWT containing the user's ID, name, and email.
+4. Return the token and user details in the response.
+
+The permission authorization handler checks whether the authenticated principal has a claim with type `permission` and a value matching the requested policy name (for example, `user:update`). A complete RBAC flow still needs to load a user's roles and permissions, include the resulting permission claims in the token or resolve them during authorization, and ensure bearer authentication runs before authorization.
+
+## Important implementation details
+
+### Password handling
+
+- Registration hashes the submitted password with BCrypt before saving it; the plain-text password is not assigned to the user entity.
+- Login verifies the supplied password against the stored hash with BCrypt.
+- Registration validation is wired through a MediatR pipeline behavior. The listed name, email, password, and confirmation rules apply to registration; there is no corresponding login validator in the current implementation.
+- Registration currently does not check for an existing email before inserting a user. Do not assume duplicate-email prevention is implemented.
+
+### JWT contents and validation
+
+- Tokens are configured with issuer, audience, signing key, and an expiration time from `JwtSettings`.
+- The token generator creates user ID, email, and name claims, and signs the token using HMAC-SHA512.
+- The generated token currently contains no role or permission claims. Although the response DTO has a `refreshToken` field, refresh-token issuance is not implemented.
+- `tokenValidityMin` is currently calculated in seconds, despite its name.
+- Token creation currently uses `JwtSecurityToken.ToString()` rather than serializing the token with `JwtSecurityTokenHandler.WriteToken`. Treat the returned token as unverified until this is corrected.
+
+### RBAC model
+
+The intended relationship is **user → role → permission**. `UserRole` represents the user-to-role link, and `RolePermission` links roles with permissions. The policy provider treats a policy name (such as `user:update`) as the required permission name, and the authorization handler checks for a matching `permission` claim.
+
+These are currently building blocks, not a complete working RBAC feature: there are no role/permission assignment endpoints or seeding logic, role-to-permission persistence is not yet fully migrated, and the token/authentication pipeline does not supply permission claims to the handler.
+
+### Example requests
+
+With the API running locally, registration can be tried with:
+
+```powershell
+Invoke-RestMethod -Method Post `
+  -Uri "https://localhost:7031/api/auth/register" `
+  -ContentType "application/json" `
+  -Body '{"name":"Jane Doe","email":"jane@example.com","password":"StrongPass123","confirmPassword":"StrongPass123"}'
 ```
 
-### 2. **Password Verification**
-During login, the provided password is verified against the stored hash:
-```csharp
-var isValid = BCrypt.Net.BCrypt.Verify(providedPassword, storedHash);
+Sign in with:
+
+```powershell
+Invoke-RestMethod -Method Post `
+  -Uri "https://localhost:7031/api/auth" `
+  -ContentType "application/json" `
+  -Body '{"email":"jane@example.com","password":"StrongPass123"}'
 ```
 
-### 3. **Token Creation Process**
-The token generation follows these steps:
-1. Create symmetric security key from JWT secret
-2. Create signing credentials using HMAC-SHA256
-3. Prepare user claims (ID, Name, Email)
-4. Create JWT token with issuer, audience, and expiration
-5. Convert token to string format
+These examples demonstrate the request shapes; successful database access requires a configured SQL Server connection, and the current JWT and protected-endpoint limitations above still apply.
 
-### 4. **Error Handling**
-- Invalid email returns: "Email or Password invalid."
-- Invalid password returns: "Email or Password invalid."
-- Exceptions are caught and returned as error responses
-- Prevents information leakage about account existence
+## Current project structure
 
-### 5. **Token Expiration**
-- Tokens expire based on `ExpirationMinute` setting
-- Default: 60 minutes
-- Expired tokens will be rejected by validation middleware
-
-## 📁 Project Structure
-
-```
+```text
 Authentication&Authorization/
 ├── MyApp.API/
 │   ├── Controllers/
-│   │   └── AuthController.cs          # Authentication endpoint
-│   ├── Program.cs                     # Service configuration
-│   ├── appsettings.json              # Configuration settings
-│   └── Properties/
-│       └── launchSettings.json       # Launch profiles
-│
+│   │   ├── AuthController.cs
+│   │   └── UserController.cs
+│   ├── Program.cs
+│   └── appsettings.json
 ├── MyApp.Application/
+│   ├── Behavior/                  # MediatR validation pipeline
+│   ├── DTOs/
 │   ├── Features/
-│   │   └── Authentication/
-│   │       ├── AuthCommand.cs        # Login request
-│   │       └── AuthHandler.cs        # Authentication logic
+│   │   ├── Authentication/
+│   │   ├── Registration/
+│   │   └── Users/FetchAll/
 │   ├── Interfaces/
-│   │   ├── Repository/
-│   │   │   └── IUserRepository.cs    # User data access contract
-│   │   └── Services/
-│   │       └── ITokenGenerator.cs    # Token generation contract
-│   ├── Services/
-│   │   ├── TokenGenerator.cs         # JWT token implementation
-│   │   └── JwtSettings.cs            # JWT configuration
-│   └── DTOs/
-│       ├── AuthResponseDTO.cs        # Login response
-│       └── GenericResponseDTO.cs     # Generic response wrapper
-│
-├── MyApp.Infrastructure/
-│   ├── Persistence/
-│   │   └── ApplicationDbContext.cs   # Database context
-│   ├── Repository/
-│   │   └── UserRepository.cs         # User data implementation
-│   └── DependencyInjection.cs        # Infrastructure services
-│
+│   ├── Permissions/
+│   └── Services/
 ├── MyApp.Domain/
-│   └── Entities/
-│       └── Users.cs                  # User entity
-│
+│   └── Entities/                  # Users, roles, permissions, associations
+├── MyApp.Infrastructure/
+│   ├── Migrations/
+│   ├── Persistence/
+│   └── Repository/
 └── README.md
 ```
 
-## 🔄 Authentication Flow Diagram
+## Known gaps
 
-```
-Client Request (Email + Password)
-	↓
-AuthController.Login()
-	↓
-MediatR.Send(AuthCommand)
-	↓
-AuthHandler.Handle()
-	├─→ UserRepository.GetUserByEmailAsync()
-	├─→ BCrypt.Verify(Password)
-	├─→ TokenGenerator.GenerateToken()
-	└─→ Return AuthResponseDTO with Token
-	↓
-Client Receives Token
-```
+- **Authentication middleware is missing:** `Program.cs` configures JWT bearer authentication but calls `UseAuthorization()` without first calling `UseAuthentication()`. As a result, bearer tokens are not authenticated before authorization evaluates protected endpoints.
+- **Permission claims are not issued:** JWT generation currently adds user ID, name, and email claims only. The permission handler requires a `permission` claim, so the `user:update` policy cannot currently be satisfied by the generated token.
+- **JWT serialization should be corrected:** The token generator assigns `JwtSecurityToken.ToString()` to the response token instead of serializing it with `JwtSecurityTokenHandler.WriteToken`. Do not assume the returned value is a usable compact bearer token until this is corrected and verified.
+- **RBAC persistence and assignment are incomplete:** The domain has `UserRole` and `RolePermission` entities, but there is no role/permission management or seeding flow. The initial migration creates only `Users`, and the EF model does not yet configure all user-role relationships.
+- **Token duration metadata is mislabeled:** `TokenValidityMin` is populated using seconds, not minutes.
+- **Login responses do not use HTTP failure status codes:** `AuthController.Login` returns `Ok(...)` for both login success and failure.
+- **Authentication error responses need hardening:** The login handler distinguishes invalid email from invalid password and returns exception messages. Use a generic client-facing failure message and server-side logging before exposing this endpoint beyond development.
 
-## 🧪 Testing the Authentication
-
-### Using Postman or cURL
-
-```bash
-curl -X POST https://localhost:5001/api/auth \
-  -H "Content-Type: application/json" \
-  -d '{
-	"email": "user@example.com",
-	"password": "securePassword123"
-  }'
-```
-
-### Using the Generated Token
-
-Include the token in subsequent requests:
-```bash
-curl -H "Authorization: Bearer {token}" \
-  https://localhost:5001/api/protected-endpoint
-```
-
-## 🚀 Best Practices Implemented
-
-1. ✅ **Secure Password Storage** - BCrypt hashing instead of plain text
-2. ✅ **JWT Tokens** - Stateless authentication with signed tokens
-3. ✅ **CQRS Pattern** - MediatR for command handling
-4. ✅ **Dependency Injection** - Loose coupling and testability
-5. ✅ **Repository Pattern** - Abstraction of data access
-6. ✅ **Error Handling** - Generic error responses without information leakage
-7. ✅ **Clean Architecture** - Separation of concerns across layers
-8. ✅ **Configurable Settings** - JWT settings via appsettings.json
-
-## 🔒 Security Recommendations
-
-1. **Never commit secrets** - Use environment variables or secure vaults
-2. **Use HTTPS only** - Ensure all authentication traffic is encrypted
-3. **Set strong JWT secret** - Minimum 32 characters, use random values
-4. **Implement token refresh** - Add refresh token mechanism for better security
-5. **Add rate limiting** - Prevent brute force attacks on login endpoint
-6. **Validate token** - Always validate JWT tokens on protected endpoints
-7. **Use CORS carefully** - Configure CORS policy appropriately
-8. **Log authentication events** - Track successful and failed login attempts
-
-## 📝 License
+## License
 
 This project is provided as-is for educational and development purposes.
 
-## 👤 Author
+## Author
 
-Created and maintained by [aldecyrus084](https://github.com/aldecyrus084)
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
-
----
-
-**Last Updated**: 2024
-**Target Framework**: .NET 10
-**Status**: Active Development
+Created and maintained by [aldecyrus084](https://github.com/aldecyrus084).

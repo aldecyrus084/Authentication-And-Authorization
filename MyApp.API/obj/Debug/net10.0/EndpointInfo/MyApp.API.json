@@ -66,6 +66,18 @@
           }
         }
       }
+    },
+    "/api/users": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -85,19 +97,15 @@
         "additionalProperties": false
       },
       "UserRegistrationCommand": {
-        "required": [
-          "email",
-          "name"
-        ],
         "type": "object",
         "properties": {
           "name": {
-            "minLength": 1,
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "email": {
-            "minLength": 1,
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "password": {
             "type": "string",
@@ -115,6 +123,9 @@
   "tags": [
     {
       "name": "Auth"
+    },
+    {
+      "name": "User"
     }
   ]
 }
